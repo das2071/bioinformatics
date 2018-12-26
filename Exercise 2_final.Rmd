@@ -1,0 +1,36 @@
+---
+title: "Exercise 2"
+author: "Daniel Shaver"
+date: "December 25, 2018"
+output: html_document
+---
+Question 1 - Read in H3K27Ac_Limb_1.txt file and report the number of genomic locations listed in file.
+```{r}
+homer <- read.csv("Homer_peaks/h3K27Ac_Limb_1_data_only.txt", sep = "\t")
+nrow(homer)
+```
+
+Question 2 - Make a histogram of the log10 of regions sizes as shown below using base graphics.
+```{r}
+hist(log10(homer$region.size))
+```
+
+Question 3 - Make a density plot of the log10 of regions sizes as shown below using ggplot graphics.
+```{r}
+ggplot(homer, aes(x = log10(region.size))) + geom_density(fill = "green")
+
+```
+
+Question 5 - Make a boxplot plot of the log10 of findPeaks.Score for each chromosome as shown below using ggplot graphics.
+
+```{r}
+ggplot(homer, aes(y = log10(findPeaks.Score), x = chr, fill = chr)) + geom_boxplot() + coord_flip()
+```
+
+Question 6 - Export the Homer genomic regions as a BED3 file.
+
+```{r}
+library(BSgenome)
+export.bed(homer, con = "homer.bed")
+```
+

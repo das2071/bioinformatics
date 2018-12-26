@@ -1,0 +1,60 @@
+---
+title: "Exercise 1_final"
+author: "Daniel Shaver"
+date: "December 25, 2018"
+output: html_document
+---
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Question 1: Read in the differential expression table and produce a data.frame of all results. How many genes have a padj < 0.05.
+```{r}
+setwd("C:/Users/Daniel/Desktop/Bioinformatics/BioInf2018CourseWork-master")
+```
+
+```{r}
+differential_table <- read.csv("DE_Genes/GM12878_Minus_HeLa_DEG.csv")
+```
+
+```{r}
+sum(differential_table$padj < 0.05)
+```
+ 
+ 
+Question 2: Now with these genes with a padj < 0.05, create a scatter plot (as seen below) of -log10 pvalues on Y axis and log2FoldChange on X axis using ggplot2.
+```{r}
+padj_table <- differential_table[differential_table$padj < 0.05, ]
+```
+
+```{r}
+library(ggplot2)
+(ggplot(padj_table, aes(x = log2FoldChange, y = -log10(pvalue))) + geom_point()) 
+```
+
+Question 3: Read in the absolute expression table, add 1 to every value in table and make a boxplot of log10 expression values for all samples.
+```{r}
+expression_table <- read.csv("DE_Genes/Expression.csv")
+modified_expression <- stack(log10(expression_table[, 2:5] + 1))
+(modified_plot <- ggplot(modified_expression, aes(x = ind, y = values)) + geom_boxplot())
+
+```
+
+Question 4 - Now create a similar boxplot with just genes that have a padj < 0.05 and a log2FoldChange > 1
+
+```{r}
+padj_log_table <- differential_table[differential_table$padj < 0.05 & differential_table$log2FoldChange > 1, ]
+combined_table <- merge(padj_log_table, expression_table)
+stacked_combined <- stack(log10(combined_table[9:12] + 1))
+(combined_plot <- ggplot(stacked_combined, aes(x = ind, y = values)) + geom_boxplot())
+```
+
+Question 5 - Using the absolute expression table, identify the genes whose expression is in the top 60%. Filter the results from the differential expression table to these results and plot the log2 basemean on X and log2FoldChange on Y. Highlight genes who have padj < 0.05
+
+```{r}
+top60_table <- expression_table[(expression_table$GM12878_1 > quantile(expression_table$GM12878_1, 0.6) | expression_table$GM12878_2 > quantile(expression_table$GM12878_2, 0.6) | expression_table$HeLa_1 > quantile(expression_table$HeLa_1, 0.6) | expression_table$HeLa_2 > quantile(expression_table$HeLa_2, 0.6)), ]
+merged_top60 <- merge(top60_table, differential_table)
+(ggplot(merged_top60, aes(x = log2(baseMean), y = log2FoldChange, color = padj < 0.05)) + geom_point())
+```
+
